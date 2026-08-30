@@ -5,13 +5,13 @@ export type MatchStatus = "scheduled" | "live" | "finished";
 export interface Metric {
   label: string;
   value: string;
-  inferred?: boolean;
+  inferred?: boolean | undefined;
 }
 
 export interface PlayerEntry {
   name: string;
-  team?: string;
-  stats?: string;
+  team?: string | undefined;
+  stats?: string | undefined;
 }
 
 export interface Match {
@@ -19,10 +19,10 @@ export interface Match {
   sport: Sport;
   home: string;
   away: string;
-  competition?: string;
-  date?: string; // DD/MM/YYYY
-  time?: string; // HH:MM
-  isoDate?: string; // ISO string when computable
+  competition?: string | undefined;
+  date?: string | undefined; // DD/MM/YYYY
+  time?: string | undefined; // HH:MM
+  isoDate?: string | undefined; // ISO string when computable
   status: MatchStatus;
   metrics: Metric[];
   players: PlayerEntry[];

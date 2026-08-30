@@ -48,7 +48,7 @@ export function toIso(date?: string, time?: string): string | undefined {
   const m = date.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
   if (!m) return undefined;
   const [, d, mo, yRaw] = m;
-  const y = yRaw.length === 2 ? `20${yRaw}` : yRaw;
+  const y = (yRaw ?? "").length === 2 ? `20${yRaw}` : (yRaw ?? "");
   const [hh, mm] = (time ?? "00:00").split(":");
   const dt = new Date(
     Number(y),
@@ -95,7 +95,7 @@ function isBullet(line: string) {
 
 function parseMetric(text: string): Metric | undefined {
   const m = text.match(/^([^:]{1,40}):\s*(.+)$/);
-  if (m) return { label: m[1].trim(), value: m[2].trim() };
+  if (m) return { label: (m[1] ?? "").trim(), value: (m[2] ?? "").trim() };
   if (text.length > 0 && text.length < 60) return { label: text, value: "" };
   return undefined;
 }
@@ -184,8 +184,8 @@ export function parseText(input: string): ParseResult {
       current = {
         id: nextId(),
         sport,
-        home: mm[1].trim(),
-        away: mm[2].trim(),
+        home: (mm[1] ?? "").trim(),
+        away: (mm[2] ?? "").trim(),
         competition: currentCompetition,
         date,
         time,
@@ -207,7 +207,7 @@ export function parseText(input: string): ParseResult {
     if (playersMode || /^jogador(es)?\s*[:-]/i.test(stripped)) {
       const text = stripped.replace(/^jogador(es)?\s*[:-]\s*/i, "");
       const parts = text.split(/\s*[-–—]\s*|\s*\|\s*/);
-      const entry: PlayerEntry = { name: parts[0].trim() };
+      const entry: PlayerEntry = { name: (parts[0] ?? "").trim() };
       if (parts.length > 1) entry.stats = parts.slice(1).join(" · ").trim();
       if (entry.name) current.players.push(entry);
       continue;
@@ -277,12 +277,12 @@ function coerceMetrics(value: unknown): Metric[] {
         if (typeof v === "string") return parseMetric(v);
         if (v && typeof v === "object") {
           const o = v as Record<string, unknown>;
-          const label = String(o.label ?? o.nome ?? o.key ?? "").trim();
+          const label = String(o["label"] ?? o["nome"] ?? o["key"] ?? "").trim();
           if (!label) return undefined;
           return {
             label,
-            value: String(o.value ?? o.valor ?? ""),
-            inferred: Boolean(o.inferred ?? o.inferido),
+            value: String(o["value"] ?? o["valor"] ?? ""),
+            inferred: Boolean(o["inferred"] ?? o["inferido"]),
           };
         }
         return undefined;
@@ -305,19 +305,19 @@ function coercePlayers(value: unknown): PlayerEntry[] {
       if (typeof v === "string") return { name: v };
       if (v && typeof v === "object") {
         const o = v as Record<string, unknown>;
-        const name = String(o.name ?? o.nome ?? "").trim();
+        const name = String(o["name"] ?? o["nome"] ?? "").trim();
         if (!name) return undefined;
         const stats =
-          typeof o.stats === "string"
-            ? o.stats
-            : o.stats && typeof o.stats === "object"
-              ? Object.entries(o.stats as Record<string, unknown>)
+          typeof o["stats"] === "string"
+            ? o["stats"]
+            : o["stats"] && typeof o["stats"] === "object"
+              ? Object.entries(o["stats"] as Record<string, unknown>)
                   .map(([k, val]) => `${k}: ${val}`)
                   .join(" · ")
-              : typeof o.estatisticas === "string"
-                ? o.estatisticas
+              : typeof o["estatisticas"] === "string"
+                ? o["estatisticas"]
                 : undefined;
-        return { name, team: o.team ? String(o.team) : undefined, stats };
+        return { name, team: o["team"] ? String(o["team"]) : undefined, stats };
       }
       return undefined;
     })
